@@ -11,8 +11,13 @@
 
 .app__header{
   background-color: white;
-  padding: 20px;
+  padding: 10px;
   border-bottom: 1px solid lightgray;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+.app__headerImage{
   object-fit: contain;
 }
 
@@ -23,7 +28,7 @@
 
 .post{
   background-color: white;
-  max-width: 700px;
+  max-width: 500px;
   border: 1px solid lightgray;
   margin-bottom: 10px;
 }
@@ -44,4 +49,11 @@
 }
 .post__avatar{
   margin-right: 10px;
+}
+
+.imageupload{
+  display: flex;
+  flex-direction: column;
+  width: 60%;
+  margin: 10px auto;
 }

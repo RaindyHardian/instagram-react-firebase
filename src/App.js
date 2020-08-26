@@ -6,6 +6,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
 import { Button, Input } from '@material-ui/core';
 import { db,auth } from './firebase';
+import ImageUpload from './Components/ImageUpload';
 
 function App() {
   const classes = useStyles();
@@ -23,7 +24,7 @@ function App() {
     const unsubscribe = auth.onAuthStateChanged((authUser)=>{
       if (authUser) {
         // user has logged in
-        console.log(authUser)
+        // console.log(authUser)
         setUser(authUser)
       } else {
         // user has logged out
@@ -37,7 +38,7 @@ function App() {
   },[user, username])
 
   useEffect(()=>{
-    db.collection('posts').onSnapshot(snapshot=>{
+    db.collection('posts').orderBy('timestamp', 'desc').onSnapshot(snapshot=>{
       snapshot.docs.map(doc=>{ // the whole data
         console.log(doc.data()) // single data
       })
@@ -155,17 +156,23 @@ function App() {
           src="https://www.instagram.com/static/images/web/mobile_nav_type_logo.png/735145cfe0a4.png"
           alt=""
          />
+         {user?(
+            <Button onClick={()=>auth.signOut()}>Log out</Button>
+          ):(
+            <div>
+              <Button onClick={()=>setOpenSignIn(true)}>Sign In</Button>
+              <Button onClick={()=>setOpen(true)}>Sign Up</Button>
+            </div>
+          )}
       </div>
 
-      {user?(
-        <Button onClick={()=>auth.signOut()}>Log out</Button>
-      ):(
-        <div>
-          <Button onClick={()=>setOpenSignIn(true)}>Sign In</Button>
-          <Button onClick={()=>setOpen(true)}>Sign Up</Button>
-        </div>
-      )}
       
+      
+      {user? (
+        <ImageUpload username={user.displayName}/>
+      ):(
+        <h3>You need to login</h3>
+      )}
 
       {posts.map(({id, post})=>(
         <Post key={id} username={post.username} caption={post.caption} imageUrl={post.imageUrl}/>
