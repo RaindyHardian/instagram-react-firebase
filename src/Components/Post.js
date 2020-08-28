@@ -1,26 +1,38 @@
 import React, {useState, useEffect} from 'react'
-import { Avatar } from '@material-ui/core';
+import { Avatar, Button, Input } from '@material-ui/core';
+import firebase from "firebase"
 import { db } from '../firebase';
 
-const Post = ({postId, username, caption, imageUrl}) => {
+const Post = ({postId, username, caption, imageUrl, isLoggedIn, loggedInUser_id}) => {
     const [comments, setComments] = useState([]);
+    const [inputComment, setInputComment] = useState("");
+
     useEffect(()=>{
         // console.log(postId)
         if(postId){
-            db.collection("posts").doc(postId).collection("comments").get().then(snapshot=>{
+            db.collection("posts").doc(postId).collection("comments").onSnapshot(snapshot=>{
+                setComments([])
                 snapshot.docs.map(doc=>{
                     doc.data().user_id.get().then(user=>{
                         setComments(prevPosts=>[...prevPosts, {
                             id : doc.id,
                             comment : doc.data(),
                             username : user.data().displayName
-                        }]) 
+                        }])
                     })
                 })
-                // setComments(snapshot.docs.map(doc=>doc.data()))
             })
         }
     },[])
+    const postComment = ()=>{
+        db.collection(`posts/${postId}/comments`).add({
+            text: inputComment,
+            user_id: db.doc('users/' + loggedInUser_id),
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        })
+        console.log(loggedInUser_id)
+        console.log(inputComment)
+    }
     return (
         <div className="post">
             <div className="post__header">
@@ -50,6 +62,14 @@ const Post = ({postId, username, caption, imageUrl}) => {
                     <strong>{username}</strong> {comment.text}
                 </h4>
             ))}
+            {isLoggedIn?(
+                <div className="post__comment">
+                    <input type="text" className="post__commentInput" placeholder="Add a comment..." value={inputComment} onChange={(e)=>setInputComment(e.target.value)}/>
+                    {inputComment===''?'':(
+                        <button className="post__commentButton" onClick={postComment}>Post</button>
+                    )}
+                </div>
+            ):''}
             
         </div>
     )

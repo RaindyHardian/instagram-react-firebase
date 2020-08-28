@@ -180,7 +180,7 @@ function App() {
       <div className="app__container">
       <Switch>
         <Route exact path="/">
-          <Home user={user}/>
+          <Home user={user} isLoggedIn={isLoggedIn}/>
         </Route>
         <Route exact path="/upload">
           <ImageUpload/>
