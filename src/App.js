@@ -1,57 +1,53 @@
 import React,{useState, useEffect} from 'react';
 import './App.css';
-import Post from './Components/Post';
-
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link
+} from "react-router-dom";
 import { makeStyles } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
 import { Button, Input } from '@material-ui/core';
 import { db,auth } from './firebase';
 import ImageUpload from './Components/ImageUpload';
+import BottomNav from './Components/BottomNav';
+import Home from './Components/Home';
+import Post from './Components/Post';
 
 function App() {
   const classes = useStyles();
   const [modalStyle] = useState(getModalStyle);
   
-  const [posts, setPosts] = useState([])
   const [open, setOpen] = useState(false)
   const [openSignIn, setOpenSignIn] = useState(false)
   const [username, setUsername] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState({})
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(()=>{
     const unsubscribe = auth.onAuthStateChanged((authUser)=>{
       if (authUser) {
         // user has logged in
-        // console.log(authUser)
+        console.log(authUser.user)
         setUser(authUser)
+        setIsLoggedIn(true)
+        setIsLoading(false)
       } else {
         // user has logged out
-        setUser(null)
+        setUser({})
+        setIsLoggedIn(false)
+        setIsLoading(false)
       }
     })
     
     return ()=>{
       unsubscribe()
     }
-  },[user, username])
-
-  useEffect(()=>{
-    db.collection('posts').orderBy('timestamp', 'desc').onSnapshot(snapshot=>{
-      snapshot.docs.map(doc=>{ // the whole data
-        console.log(doc.data()) // single data
-      })
-
-      // assign the data to posts state
-      setPosts(snapshot.docs.map(doc=>(
-        {
-          id: doc.id,
-          post: doc.data()
-        }
-      )))
-    })
-
   },[])
 
   const signUp = (e)=>{
@@ -61,6 +57,11 @@ function App() {
     .then((authUser)=>{
       authUser.user.updateProfile({
         displayName: username,
+      })
+      db.collection("users").doc(authUser.user.uid).set({
+        bio: "",
+        displayName: username,
+        email : authUser.user.email
       })
       setOpen(false);
     })
@@ -81,8 +82,8 @@ function App() {
     })
     
   }
-
   return (
+    <Router>
     <div className="app">
       <Modal
         open={open}
@@ -119,7 +120,6 @@ function App() {
           </form>
         </div>
       </Modal>
-
       <Modal
         open={openSignIn}
         onClose={()=> setOpenSignIn(false)}
@@ -156,30 +156,43 @@ function App() {
           src="https://www.instagram.com/static/images/web/mobile_nav_type_logo.png/735145cfe0a4.png"
           alt=""
          />
-         {user?(
-            <Button onClick={()=>auth.signOut()}>Log out</Button>
-          ):(
-            <div>
-              <Button onClick={()=>setOpenSignIn(true)}>Sign In</Button>
-              <Button onClick={()=>setOpen(true)}>Sign Up</Button>
-            </div>
-          )}
+         {
+          isLoading?'':(
+            isLoggedIn?(
+              <Button onClick={()=>auth.signOut()}>Log out</Button>
+            ):(
+              <div>
+                <Button onClick={()=>setOpenSignIn(true)}>Sign In</Button>
+                <Button onClick={()=>setOpen(true)}>Sign Up</Button>
+              </div>
+            )  
+          )
+        }
       </div>
-
-      
-      
-      {user? (
-        <ImageUpload username={user.displayName}/>
+      {/* {user? (
+        <ImageUpload username={user.displayName} user_id={user.uid}/>
       ):(
-        <h3>You need to login</h3>
+        <h3>You need to login to upload an image</h3>
+      )} */}
+      {/* {posts.map(({id, post, username})=>(
+        <Post key={id} postId={id} username={username} caption={post.caption} imageUrl={post.imageUrl}/>
+      ))}  */}
+      <div className="app__container">
+      <Switch>
+        <Route exact path="/">
+          <Home user={user}/>
+        </Route>
+        <Route exact path="/upload">
+          <ImageUpload/>
+        </Route>
+      </Switch>
+      </div>
+      {isLoading?'':(
+        <BottomNav user={user}/>
       )}
-
-      {posts.map(({id, post})=>(
-        <Post key={id} username={post.username} caption={post.caption} imageUrl={post.imageUrl}/>
-      ))}
       
-              
     </div>
+    </Router>
   );
 }
 

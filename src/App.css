@@ -25,12 +25,15 @@
   display: flex;
   flex-direction: column;
 }
+.app__container{
+  margin-bottom: 70px;
+}
 
 .post{
   background-color: white;
   max-width: 500px;
-  border: 1px solid lightgray;
-  margin-bottom: 10px;
+  /* border: 1px solid lightgray; */
+  margin-bottom: 20px;
 }
 .post__image{
   width: 100%;
@@ -40,15 +43,26 @@
 }
 .post__text{
   font-weight: normal;
-  padding: 10px 20px;
+  padding: 1px 10px;
 }
 .post__header{
   display:flex;
   align-items: center;
-  padding: 10px 20px;
+  padding: 10px 10px;
+  background-color: rgb(253, 253, 253);
 }
 .post__avatar{
   margin-right: 10px;
+}
+.post__action{
+  padding: 1px 10px;
+  display: flex;
+  flex-direction: row;
+}
+.post__actionSVG{
+  margin-right: 10px;
+  width: 35px;
+  object-fit: contain;
 }
 
 .imageupload{
@@ -56,4 +70,30 @@
   flex-direction: column;
   width: 60%;
   margin: 10px auto;
+}
+
+.BottomNav{
+  position: fixed;
+  width: 100%;
+  bottom: 0;
+  background-color: rgb(245, 245, 245);
+  padding: 10px 0;
+  border-top: 1px solid lightgray;
+}
+.BottomNav__container{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+.BottomNav__divSVG{
+  width: 30px;
+}
+.BottomNav__link{
+  color: black;
+}
+.BottomNav__profile{
+  object-fit: contain;
+  width: 30px !important;
+  height: 30px !important;
+  border: 1px solid rgb(180, 180, 180);
 }
