@@ -1,43 +1,78 @@
 import React, {useState, useEffect} from 'react'
-import { Avatar, Button, Input } from '@material-ui/core';
+import { Avatar, Button, Input, CircularProgress, Menu, MenuItem } from '@material-ui/core';
 import firebase from "firebase"
 import { db } from '../firebase';
+
+// import {Menu} from '@material-ui/core';
+// import MenuItem from '@material-ui/core/MenuItem';
 
 const Post = ({postId, username, caption, imageUrl, isLoggedIn, loggedInUser_id}) => {
     const [comments, setComments] = useState([]);
     const [inputComment, setInputComment] = useState("");
+    const [postLoading, setPostLoading] = useState(false);
+    const [anchorEl, setAnchorEl] = useState(null);
+
 
     useEffect(()=>{
         // console.log(postId)
         if(postId){
-            db.collection("posts").doc(postId).collection("comments").onSnapshot(snapshot=>{
-                setComments([])
-                snapshot.docs.map(doc=>{
-                    doc.data().user_id.get().then(user=>{
-                        setComments(prevPosts=>[...prevPosts, {
-                            id : doc.id,
-                            comment : doc.data(),
-                            username : user.data().displayName
-                        }])
-                    })
-                })
+            db.collection("posts").doc(postId).collection("comments").orderBy('timestamp', 'asc').onSnapshot( async snapshot=>{
+                setComments(await Promise.all(snapshot.docs.map(async doc=>{
+                    let user = await doc.data().user_id.get()
+                    return {
+                        id : doc.id,
+                        comment : doc.data(),
+                        username : user.data().displayName
+                    }
+                })))
             })
         }
     },[])
     const postComment = ()=>{
+        setPostLoading(true)
         db.collection(`posts/${postId}/comments`).add({
             text: inputComment,
             user_id: db.doc('users/' + loggedInUser_id),
             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        }).then(()=>{
+            setInputComment('')
+            setPostLoading(false)
+        }).catch(err=>{
+            setPostLoading(false)
         })
         console.log(loggedInUser_id)
         console.log(inputComment)
     }
+
+    const dotClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const dotClose = () => {
+        setAnchorEl(null);
+    };
+
     return (
         <div className="post">
             <div className="post__header">
-                <Avatar className="post__avatar" alt={username} src="/static/images/avatar/1.jpg" />
-                <h3>{username}</h3>
+                <div className="post__profile">
+                    <Avatar className="post__avatar" alt={username} src="/static/images/avatar/1.jpg" />
+                    <h3>{username}</h3>
+                </div>
+                <div className="post__menu" aria-controls="simple-menu" aria-haspopup="true" onClick={dotClick}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                    </svg>
+                </div>
+                <Menu
+                    id="simple-menu"
+                    anchorEl={anchorEl}
+                    keepMounted
+                    open={Boolean(anchorEl)}
+                    onClose={dotClose}
+                >
+                    <MenuItem onClick={dotClose}>Delete Post</MenuItem>
+                </Menu>
             </div>
 
             {/* image */}
@@ -66,7 +101,11 @@ const Post = ({postId, username, caption, imageUrl, isLoggedIn, loggedInUser_id}
                 <div className="post__comment">
                     <input type="text" className="post__commentInput" placeholder="Add a comment..." value={inputComment} onChange={(e)=>setInputComment(e.target.value)}/>
                     {inputComment===''?'':(
-                        <button className="post__commentButton" onClick={postComment}>Post</button>
+                        <>
+                        {postLoading?(<CircularProgress />):(
+                            <button className="post__commentButton" onClick={postComment}>Post</button>
+                        )}
+                        </>
                     )}
                 </div>
             ):''}

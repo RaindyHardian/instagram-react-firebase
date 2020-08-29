@@ -33,7 +33,7 @@ function App() {
     const unsubscribe = auth.onAuthStateChanged((authUser)=>{
       if (authUser) {
         // user has logged in
-        console.log(authUser.user)
+        // console.log(authUser.user.uid)
         setUser(authUser)
         setIsLoggedIn(true)
         setIsLoading(false)

@@ -49,9 +49,21 @@
 }
 .post__header{
   display:flex;
+  justify-content: space-between;
   align-items: center;
   padding: 10px 10px;
   background-color: rgb(253, 253, 253);
+}
+.post__profile{
+  display: flex;
+  align-items: center;
+}
+.post__menu{
+  width: 20px;
+  height: 20px;
+}
+.post__menu:hover{
+  cursor: pointer;
 }
 .post__avatar{
   margin-right: 10px;
