@@ -1,33 +1,78 @@
 import React, {useState, useEffect} from 'react'
-import { Avatar, Button, Input, CircularProgress, Menu, MenuItem } from '@material-ui/core';
+import { Avatar, Button, Input, CircularProgress, Menu, MenuItem,Modal } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import firebase from "firebase"
 import { db } from '../firebase';
 
 // import {Menu} from '@material-ui/core';
 // import MenuItem from '@material-ui/core/MenuItem';
 
-const Post = ({postId, username, caption, imageUrl, isLoggedIn, loggedInUser_id}) => {
+const Post = ({postId, username, caption, imageUrl, postUser_id, isLoggedIn, loggedInUser_id}) => {
     const [comments, setComments] = useState([]);
     const [inputComment, setInputComment] = useState("");
     const [postLoading, setPostLoading] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
+    const [likes, setLikes] = useState([])
+    
+    
+    const classes = useStyles();
+    const [modalStyle] = useState(getModalStyle);
+    const [modalLikeOpen, setModalLikeOpen] = useState(false)
 
+    const [likeSVG,setLikeSVG] = useState((<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+  </svg>))
+
+    const deletePostButton = ()=>{
+        if(postUser_id == loggedInUser_id){
+            return <MenuItem onClick={deletePost}>Delete Post</MenuItem>
+        }else{
+            return ''
+        }
+    }
 
     useEffect(()=>{
         // console.log(postId)
         if(postId){
+            // set comments
             db.collection("posts").doc(postId).collection("comments").orderBy('timestamp', 'asc').onSnapshot( async snapshot=>{
                 setComments(await Promise.all(snapshot.docs.map(async doc=>{
                     let user = await doc.data().user_id.get()
                     return {
                         id : doc.id,
                         comment : doc.data(),
-                        username : user.data().displayName
+                        username : user.data().displayName,
+                        user_id : user.id
+                    }
+                })))
+            })
+            // set likes
+            db.collection("posts").doc(postId).collection("likes").onSnapshot(async snapshot=>{
+                setLikes(await Promise.all(snapshot.docs.map(async doc=>{
+                    let user = await doc.data().user_id.get()
+                    return {
+                        id: doc.id,
+                        username : user.data().displayName 
                     }
                 })))
             })
         }
     },[])
+
+    useEffect(()=>{
+        likes.map(like=>{
+            if(like.id===loggedInUser_id){
+                setLikeSVG((<svg style={{color:'#ed4956'}} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+              </svg>))
+            } else{
+                setLikeSVG((<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>))
+            }
+        })
+    },[likes, isLoggedIn])
+
     const postComment = ()=>{
         setPostLoading(true)
         db.collection(`posts/${postId}/comments`).add({
@@ -40,8 +85,47 @@ const Post = ({postId, username, caption, imageUrl, isLoggedIn, loggedInUser_id}
         }).catch(err=>{
             setPostLoading(false)
         })
-        console.log(loggedInUser_id)
-        console.log(inputComment)
+    }
+
+    const submitLike = ()=>{
+        if(!isLoggedIn){
+            return alert("Please login to like a post")
+        } else{
+            if(likes.length!=0){
+                likes.map(like=>{
+                    if(like.id==loggedInUser_id){
+                        db.collection(`posts/${postId}/likes`).doc(loggedInUser_id).delete().then(()=>{
+                            setLikeSVG((<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                          </svg>))
+                        })
+                    } else{
+                        db.collection(`posts/${postId}/likes`).doc(loggedInUser_id).set({
+                            user_id: db.doc('users/' + loggedInUser_id),
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        }).then(()=>{
+                            setLikeSVG((<svg style={{color:'#ed4956'}} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+                            </svg>))
+                        })
+                    }
+                })
+            }else{
+                db.collection(`posts/${postId}/likes`).doc(loggedInUser_id).set({
+                    user_id: db.doc('users/' + loggedInUser_id),
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                })
+            }
+        }
+    }
+    
+    const deletePost = ()=>{
+        if(postUser_id === loggedInUser_id){
+            // alert("SAMA post user_id "+ postUser_id + " || "+loggedInUser_id)    
+            db.collection("posts").doc(postId).delete()
+        } else{
+            alert("Can't perform deleting post")
+        }
     }
 
     const dotClick = (event) => {
@@ -58,6 +142,7 @@ const Post = ({postId, username, caption, imageUrl, isLoggedIn, loggedInUser_id}
                 <div className="post__profile">
                     <Avatar className="post__avatar" alt={username} src="/static/images/avatar/1.jpg" />
                     <h3>{username}</h3>
+                    
                 </div>
                 <div className="post__menu" aria-controls="simple-menu" aria-haspopup="true" onClick={dotClick}>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -71,7 +156,8 @@ const Post = ({postId, username, caption, imageUrl, isLoggedIn, loggedInUser_id}
                     open={Boolean(anchorEl)}
                     onClose={dotClose}
                 >
-                    <MenuItem onClick={dotClose}>Delete Post</MenuItem>
+                    <MenuItem onClick={dotClose}>Visit Profile</MenuItem>
+                    {(deletePostButton)()}
                 </Menu>
             </div>
 
@@ -79,10 +165,8 @@ const Post = ({postId, username, caption, imageUrl, isLoggedIn, loggedInUser_id}
             <img className="post__image" src={imageUrl} alt=""/>
             
             <div className="post__action">
-                <div className="post__actionSVG">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
+                <div className="post__actionSVG" onClick={submitLike}>
+                    {likeSVG}
                 </div>
                 <div className="post__actionSVG">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -90,10 +174,11 @@ const Post = ({postId, username, caption, imageUrl, isLoggedIn, loggedInUser_id}
                     </svg>
                 </div>
             </div>
+            <h4 className="post__text font-gray" onClick={()=>setModalLikeOpen(true)}><strong>{likes.length} Likes</strong></h4>
             {/* username + caption */}
-            <h4 className="post__text"><strong>{username}</strong> {caption}</h4>
+            <h4 className="post__text font-gray"><strong>{username}</strong> {caption}</h4>
             {comments.map(({id, comment,username})=>(
-                <h4 className="post__text" key={id}>
+                <h4 className="post__text font-gray" key={id}>
                     <strong>{username}</strong> {comment.text}
                 </h4>
             ))}
@@ -110,8 +195,49 @@ const Post = ({postId, username, caption, imageUrl, isLoggedIn, loggedInUser_id}
                 </div>
             ):''}
             
+            <Modal
+                open={modalLikeOpen}
+                onClose={()=> setModalLikeOpen(false)}
+            >
+                <div style={modalStyle} className="post__like">
+                    <div className="post__likeTitle font-gray font-bold">
+                        Likes
+                    </div>
+                    <div className="post_likeListContainer">
+                    {likes.map(like=>(
+                        <div key={like.id } className="post__likeListItem">
+                            <Avatar className="post__avatar" alt={like.username} src="/static/images/avatar/1.jpg" />
+                            <div className="font-gray font-bold">{like.username}</div>
+                        </div>
+                    ))}
+                    </div>
+                </div>
+            </Modal>
+
         </div>
     )
 }
+
+function getModalStyle() {
+    const top = 50;
+    const left = 50;
+
+    return {
+        top: `${top}%`,
+        left: `${left}%`,
+        transform: `translate(-${top}%, -${left}%)`,
+    };
+}
+
+const useStyles = makeStyles((theme) => ({
+    paper: {
+        position: 'absolute',
+        width: 400,
+        backgroundColor: theme.palette.background.paper,
+        border: '1px solid #000',
+        boxShadow: theme.shadows[5],
+        padding: theme.spacing(2, 4, 3),
+    },
+}));
 
 export default Post

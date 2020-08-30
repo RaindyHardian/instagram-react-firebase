@@ -80,7 +80,12 @@ function App() {
     .catch((err)=>{
       alert(err.message)
     })
-    
+  }
+
+  const signOut = (e)=>{
+    e.preventDefault()
+    auth.signOut()
+    setIsLoggedIn(false)
   }
   return (
     <Router>
@@ -159,7 +164,7 @@ function App() {
          {
           isLoading?'':(
             isLoggedIn?(
-              <Button onClick={()=>auth.signOut()}>Log out</Button>
+              <Button onClick={signOut}>Log out</Button>
             ):(
               <div>
                 <Button onClick={()=>setOpenSignIn(true)}>Sign In</Button>
