@@ -14,6 +14,7 @@ import ImageUpload from './Components/ImageUpload';
 import BottomNav from './Components/BottomNav';
 import Home from './Components/Home';
 import Post from './Components/Post';
+import Profile from './Components/Profile';
 
 function App() {
   const classes = useStyles();
@@ -190,10 +191,13 @@ function App() {
         <Route exact path="/upload">
           <ImageUpload/>
         </Route>
+        <Route exact path="/profile/:id">
+          <Profile user={user} isLoggedIn={isLoggedIn}/>
+        </Route>
       </Switch>
       </div>
       {isLoading?'':(
-        <BottomNav user={user}/>
+        <BottomNav user={user} isLoggedIn={isLoggedIn}/>
       )}
       
     </div>

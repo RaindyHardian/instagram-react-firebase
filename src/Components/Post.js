@@ -141,7 +141,7 @@ const Post = ({postId, username, caption, imageUrl, postUser_id, isLoggedIn, log
             <div className="post__header">
                 <div className="post__profile">
                     <Avatar className="post__avatar" alt={username} src="/static/images/avatar/1.jpg" />
-                    <h3>{username}</h3>
+                    <h3 className="font-gray">{username}</h3>
                     
                 </div>
                 <div className="post__menu" aria-controls="simple-menu" aria-haspopup="true" onClick={dotClick}>

@@ -6,6 +6,11 @@ import { Avatar } from '@material-ui/core';
 
 const BottomNav = (props) => {
     let username = props.user.displayName || "";
+    let loggedInUser_id;
+    if(props.isLoggedIn){
+        loggedInUser_id = props.user.uid;
+    }
+    
     return (
         <div className="BottomNav">
             <div className="BottomNav__container">
@@ -39,7 +44,9 @@ const BottomNav = (props) => {
                 </div>
                 <div className="BottomNav__divSVG">
                     {/* PROFILE */}
-                    <Avatar className="BottomNav__profile" alt={username} src="/static/images/avatar/1.jpg" />
+                    <Link to={"/profile/"+loggedInUser_id} className="BottomNav__link">
+                        <Avatar className="BottomNav__profile" alt={username} src="/static/images/avatar/1.jpg" />
+                    </Link>
                 </div>
             </div>
         </div>
