@@ -1,68 +1,79 @@
 import React, {useState, useEffect} from 'react'
-import { Avatar, Button, Input, CircularProgress, Menu, MenuItem,Modal } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import firebase from "firebase"
-import { db } from '../firebase';
+import {
+    useHistory,
+    useParams
+} from "react-router-dom";
+import { Avatar, Modal, CircularProgress, Menu, MenuItem } from "@material-ui/core";
+import firebase from 'firebase'
+import {db} from "../../firebase"
 
-// import {Menu} from '@material-ui/core';
-// import MenuItem from '@material-ui/core/MenuItem';
-
-const Post = ({postId, username, caption, imageUrl, postUser_id, isLoggedIn, loggedInUser_id}) => {
+const SinglePost = (props) => {
+    let { id } = useParams();
+    const history = useHistory();
+    const [post, setPost] = useState({})
+    const [likes, setLikes] = useState([])
     const [comments, setComments] = useState([]);
     const [inputComment, setInputComment] = useState("");
     const [postLoading, setPostLoading] = useState(false);
-    const [anchorEl, setAnchorEl] = useState(null);
-    const [likes, setLikes] = useState([])
     
-    
-    const classes = useStyles();
+    const [isLoading, setIsLoading] = useState(true)
     const [modalStyle] = useState(getModalStyle);
-    const [modalLikeOpen, setModalLikeOpen] = useState(false)
-    const [modalCommentsOpen, setModalCommentsOpen] = useState(false)
+    const [modalLikeOpen, setModalLikeOpen] = useState(false);
+    const [anchorEl, setAnchorEl] = useState(null);
+
 
     const [likeSVG,setLikeSVG] = useState((<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
   </svg>))
-
     const deletePostButton = ()=>{
-        if(postUser_id == loggedInUser_id){
+        if(post.user_id == props.user.uid){
             return <MenuItem onClick={deletePost}>Delete Post</MenuItem>
         }else{
             return ''
         }
     }
 
-    useEffect(()=>{
-        // console.log(postId)
-        if(postId){
-            // set comments
-            db.collection("posts").doc(postId).collection("comments").orderBy('timestamp', 'asc').onSnapshot( async snapshot=>{
-                setComments(await Promise.all(snapshot.docs.map(async doc=>{
-                    let user = await doc.data().user_id.get()
-                    return {
-                        id : doc.id,
-                        comment : doc.data(),
-                        username : user.data().displayName,
-                        user_id : user.id
-                    }
-                })))
+    useEffect(() => {
+        // set post
+        db.collection("posts").doc(id).onSnapshot( async doc=>{
+            // console.log(snapshot.data())
+            let user = await doc.data().user_id.get()
+            setPost({
+                id : doc.id,
+                post : doc.data(),
+                username : user.data().displayName,
+                user_id : user.id
             })
-            // set likes
-            db.collection("posts").doc(postId).collection("likes").onSnapshot(async snapshot=>{
-                setLikes(await Promise.all(snapshot.docs.map(async doc=>{
-                    let user = await doc.data().user_id.get()
-                    return {
-                        id: doc.id,
-                        username : user.data().displayName 
-                    }
-                })))
-            })
-        }
-    },[])
+            setIsLoading(false)
+        })
+
+        // set comments
+        db.collection("posts").doc(id).collection("comments").orderBy('timestamp', 'asc').onSnapshot( async snapshot=>{
+            setComments(await Promise.all(snapshot.docs.map(async doc=>{
+                let user = await doc.data().user_id.get()
+                return {
+                    id : doc.id,
+                    comment : doc.data(),
+                    username : user.data().displayName,
+                    user_id : user.id
+                }
+            })))
+        })
+        // set likes
+        db.collection("posts").doc(id).collection("likes").onSnapshot(async snapshot=>{
+            setLikes(await Promise.all(snapshot.docs.map(async doc=>{
+                let user = await doc.data().user_id.get()
+                return {
+                    id: doc.id,
+                    username : user.data().displayName 
+                }
+            })))
+        })
+    }, [])
 
     useEffect(()=>{
         likes.map(like=>{
-            if(like.id===loggedInUser_id){
+            if(like.id===props.user.uid){
                 setLikeSVG((<svg style={{color:'#ed4956'}} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
               </svg>))
@@ -72,13 +83,13 @@ const Post = ({postId, username, caption, imageUrl, postUser_id, isLoggedIn, log
               </svg>))
             }
         })
-    },[likes, isLoggedIn])
+    },[likes, props.isLoggedIn])
 
     const postComment = ()=>{
         setPostLoading(true)
-        db.collection(`posts/${postId}/comments`).add({
+        db.collection(`posts/${id}/comments`).add({
             text: inputComment,
-            user_id: db.doc('users/' + loggedInUser_id),
+            user_id: db.doc('users/' + props.user.uid),
             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
         }).then(()=>{
             setInputComment('')
@@ -89,20 +100,20 @@ const Post = ({postId, username, caption, imageUrl, postUser_id, isLoggedIn, log
     }
 
     const submitLike = ()=>{
-        if(!isLoggedIn){
+        if(!props.isLoggedIn){
             return alert("Please login to like a post")
         } else{
             if(likes.length!=0){
                 likes.map(like=>{
-                    if(like.id==loggedInUser_id){
-                        db.collection(`posts/${postId}/likes`).doc(loggedInUser_id).delete().then(()=>{
+                    if(like.id==props.user.uid){
+                        db.collection(`posts/${id}/likes`).doc(props.user.uid).delete().then(()=>{
                             setLikeSVG((<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                           </svg>))
                         })
                     } else{
-                        db.collection(`posts/${postId}/likes`).doc(loggedInUser_id).set({
-                            user_id: db.doc('users/' + loggedInUser_id),
+                        db.collection(`posts/${id}/likes`).doc(props.user.uid).set({
+                            user_id: db.doc('users/' + props.user.uid),
                             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                         }).then(()=>{
                             setLikeSVG((<svg style={{color:'#ed4956'}} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -112,18 +123,18 @@ const Post = ({postId, username, caption, imageUrl, postUser_id, isLoggedIn, log
                     }
                 })
             }else{
-                db.collection(`posts/${postId}/likes`).doc(loggedInUser_id).set({
-                    user_id: db.doc('users/' + loggedInUser_id),
+                db.collection(`posts/${id}/likes`).doc(props.user.uid).set({
+                    user_id: db.doc('users/' + props.user.uid),
                     timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                 })
             }
         }
     }
-    
+
     const deletePost = ()=>{
-        if(postUser_id === loggedInUser_id){
+        if(post.user_id === props.user.uid){
             // alert("SAMA post user_id "+ postUser_id + " || "+loggedInUser_id)    
-            db.collection("posts").doc(postId).delete()
+            db.collection("posts").doc(post.id).delete()
         } else{
             alert("Can't perform deleting post")
         }
@@ -138,11 +149,11 @@ const Post = ({postId, username, caption, imageUrl, postUser_id, isLoggedIn, log
     };
 
     return (
-        <div className="post">
+        <div className="singlePost">
             <div className="post__header">
                 <div className="post__profile">
-                    <Avatar className="post__avatar" alt={username} src="/static/images/avatar/1.jpg" />
-                    <h3 className="post__headerUsername">{username}</h3>        
+                    <Avatar className="post__avatar" alt={post.username} src="/static/images/avatar/1.jpg" />
+                    <h3 className="post__headerUsername">{post.username}</h3>        
                 </div>
                 <div className="post__menu" aria-controls="simple-menu" aria-haspopup="true" onClick={dotClick}>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -160,9 +171,9 @@ const Post = ({postId, username, caption, imageUrl, postUser_id, isLoggedIn, log
                     {(deletePostButton)()}
                 </Menu>
             </div>
-
             {/* image */}
-            <img className="post__image" src={imageUrl} alt=""/>
+            {!isLoading?<img className="post__image" src={post.post.imageUrl} alt=""/>:''}
+            
             
             <div className="post__action">
                 <div className="post__actionSVG" onClick={submitLike}>
@@ -174,25 +185,17 @@ const Post = ({postId, username, caption, imageUrl, postUser_id, isLoggedIn, log
                     </svg>
                 </div>
             </div>
-            <h4 className="post__text font-gray" onClick={()=>setModalLikeOpen(true)}>
-                <strong>{likes.length} Likes</strong>
-            </h4>
+            <h4 className="post__text font-gray" onClick={()=>setModalLikeOpen(true)}><strong>{likes.length} Likes</strong></h4>
             {/* username + caption */}
-            <h4 className="post__text font-gray"><strong>{username}</strong> {caption}</h4>
-            {/* COMMENT SECTION */}
-            {comments.length!==0?(
-                <>
-                {comments.length>1?(
-                    <p className="post__seeComment" onClick={()=>setModalCommentsOpen(true)}>
-                        See other {comments.length-1} comments
-                    </p>
-                ):''}
-                <p className="post__text font-gray">
-                    <strong>{comments[comments.length-1].username}</strong> {comments[comments.length-1].comment.text}
-                </p>
-                </>
-            ):''}
-            {isLoggedIn?(
+            {!isLoading?<h4 className="post__text font-gray"><strong>{post.username}</strong> {post.post.caption}</h4>:''}
+            
+            {/* Comment section */}
+            {comments.map(({id, comment,username})=>(
+                <h4 className="post__text font-gray" key={id}>
+                    <strong>{username}</strong> {comment.text}
+                </h4>
+            ))}
+            {props.isLoggedIn?(
                 <div className="post__comment">
                     <input type="text" className="post__commentInput" placeholder="Add a comment..." value={inputComment} onChange={(e)=>setInputComment(e.target.value)}/>
                     {inputComment===''?'':(
@@ -204,42 +207,6 @@ const Post = ({postId, username, caption, imageUrl, postUser_id, isLoggedIn, log
                     )}
                 </div>
             ):''}
-            
-            {/* View All Comments Modal */}
-            <Modal
-                open={modalCommentsOpen}
-                onClose={()=> setModalCommentsOpen(false)}
-            >
-                <div style={modalStyle} className="post__commentM">
-                    <div className="post__commentTitle font-gray font-bold">
-                        Comments
-                    </div>
-                    <div className="post_likeListContainer">
-                        {/* username + caption */}
-                        <div className="post__modalCaption">
-                            <h4 className="post__text font-gray"><strong>{username}</strong> {caption}</h4>
-                        </div>
-                        {/* Comment section */}
-                        {comments.map(({id, comment,username})=>(
-                            <h4 className="post__text font-gray" key={id}>
-                                <strong>{username}</strong> {comment.text}
-                            </h4>
-                        ))}
-                        {isLoggedIn?(
-                            <div className="post__comment">
-                                <input type="text" className="post__commentInput" placeholder="Add a comment..." value={inputComment} onChange={(e)=>setInputComment(e.target.value)}/>
-                                {inputComment===''?'':(
-                                    <>
-                                    {postLoading?(<CircularProgress />):(
-                                        <button className="post__commentButton" onClick={postComment}>Post</button>
-                                    )}
-                                    </>
-                                )}
-                            </div>
-                        ):''}
-                    </div>
-                </div>
-            </Modal>
 
             {/* View Likes Modal */}
             <Modal
@@ -264,7 +231,6 @@ const Post = ({postId, username, caption, imageUrl, postUser_id, isLoggedIn, log
         </div>
     )
 }
-
 function getModalStyle() {
     const top = 50;
     const left = 50;
@@ -275,16 +241,4 @@ function getModalStyle() {
         transform: `translate(-${top}%, -${left}%)`,
     };
 }
-
-const useStyles = makeStyles((theme) => ({
-    paper: {
-        position: 'absolute',
-        width: 400,
-        backgroundColor: theme.palette.background.paper,
-        border: '1px solid #000',
-        boxShadow: theme.shadows[5],
-        padding: theme.spacing(2, 4, 3),
-    },
-}));
-
-export default Post
+export default SinglePost

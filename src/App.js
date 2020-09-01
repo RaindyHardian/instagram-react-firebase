@@ -14,7 +14,8 @@ import ImageUpload from './Components/ImageUpload';
 import BottomNav from './Components/BottomNav';
 import Home from './Components/Home';
 import Post from './Components/Post';
-import Profile from './Components/Profile';
+import Profile from './Components/Profile/Profile';
+import SinglePost from './Components/Profile/SinglePost';
 
 function App() {
   const classes = useStyles();
@@ -193,6 +194,9 @@ function App() {
         </Route>
         <Route exact path="/profile/:id">
           <Profile user={user} isLoggedIn={isLoggedIn}/>
+        </Route>
+        <Route exact path="/p/:id">
+          <SinglePost user={user} isLoggedIn={isLoggedIn}/>
         </Route>
       </Switch>
       </div>

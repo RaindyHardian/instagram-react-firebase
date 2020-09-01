@@ -1,8 +1,8 @@
 import React,{useState, useEffect} from 'react'
 import ImageUpload from './ImageUpload';
 import Post from './Post';
-
 import {db} from "../firebase"
+
 const Home = (props) => {
     const [posts, setPosts] = useState([])
     let loggedInUser_id;
