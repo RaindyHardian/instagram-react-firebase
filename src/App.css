@@ -5,7 +5,8 @@
 }
 
 .app{
-  background-color: #fafafa;
+  /* background-color: #fafafa; */
+  background-color: white;
 }
 
 .app__header{
@@ -266,6 +267,59 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.editProfile__header{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 10px;
+  background-color: rgb(247, 247, 247);
+  /* border-bottom: 1px solid rgb(192, 192, 192); */
+  box-shadow: 0px 1px 2px 0px rgba(0,0,0,0.25);
+}
+.editProfile__headerLeft{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.editProfile__title{
+  margin-left: 10px;
+  font-weight: bold;
+}
+.editProfile__action{
+  width: 25px !important;
+  height: 25px !important;
+}
+.editProfile__action:hover{
+  cursor: pointer;
+}
+.editProfile__form{
+  padding: 15px 10px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.editProfile__avatar{
+  width: 70px !important;
+  height: 70px !important;
+  margin-bottom: 5px;
+}
+.editProfile__changepic{
+  color: rgb(0,149,246);
+  margin-bottom: 10px;
+}
+.editProfile__input{
+  width: 100%;
+  margin-bottom: 20px !important;
+}
+.editProfile__info{
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+}
+.editProfile__infoTitle{
+  margin-bottom: 10px;
 }
 
 .BottomNav{

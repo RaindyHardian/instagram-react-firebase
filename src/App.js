@@ -16,6 +16,7 @@ import Home from './Components/Home';
 import Post from './Components/Post';
 import Profile from './Components/Profile/Profile';
 import SinglePost from './Components/Profile/SinglePost';
+import EditProfile from './Components/Profile/EditProfile';
 
 function App() {
   const classes = useStyles();
@@ -197,6 +198,9 @@ function App() {
         </Route>
         <Route exact path="/p/:id">
           <SinglePost user={user} isLoggedIn={isLoggedIn}/>
+        </Route>
+        <Route exact path="/edit-profile">
+          <EditProfile user={user} isLoggedIn={isLoggedIn}/>
         </Route>
       </Switch>
       </div>

@@ -14,7 +14,8 @@ const Profile = (props) => {
     const [posts, setPosts] = useState([])
     const picRef = useRef(null);
 
-    const [isLoading, setIsLoading] = useState(true);
+    const [isProfUserLoading, setIsProfUserLoading]= useState(true)
+    const [isPostLoading, setIsPostLoading] = useState(true);
 
     const [gridSectionClass, setGridSectionClass] = useState("profile__feedNavIconCont feedNavIcon_active")
     const [listSectionClass, setlistSectionClass] = useState("profile__feedNavIconCont")
@@ -25,13 +26,17 @@ const Profile = (props) => {
         // set posts
         let reference = db.collection("users").doc(id);
         reference.get().then(doc=>{
-            setProfUser(doc.data())
+            setProfUser({
+                id: doc.id, 
+                user : doc.data()
+            })
+            setIsProfUserLoading(false)
         })
         db.collection('posts').where("user_id", "==", reference).onSnapshot( async snapshot=>{
             try{
                 setPosts( await Promise.all(snapshot.docs.map( async doc=>{
                     let user = await doc.data().user_id.get()
-                    setIsLoading(false)
+                    setIsPostLoading(false)
                     return {
                         id : doc.id,
                         post : doc.data(),
@@ -58,14 +63,17 @@ const Profile = (props) => {
     const viewPost = (e)=>{
         history.push(`/p/`+e.target.attributes.postid.value)
     }
-    return (
+    const goToEdit = ()=>{
+        history.push("/edit-profile")
+    }
+    return !isProfUserLoading&&!isPostLoading?(
         <div className="profile">
             <div className="profile__head">
-                <div className="font-bold font-gray">{profUser.displayName}</div>
+                <div className="font-bold font-gray">{profUser.user.displayName}</div>
             </div>
             <div className="profile__info">
                 <div className="profile__infoA">
-                    <Avatar className="profile__avatar" alt={profUser.displayName} src="/static/images/avatar/1.jpg" />
+                    <Avatar className="profile__avatar" alt={profUser.user.displayName} src="/static/images/avatar/1.jpg" />
                     <div className="profile__infoAB">
                         <div className="font-bold">{posts.length}</div>
                         <div>Post</div>
@@ -81,14 +89,16 @@ const Profile = (props) => {
                 </div>
                 <div className="profile__infoB">
                     <div className="profile__name font-bold">
-                        {profUser.displayName}
+                        {profUser.user.fullName}
                     </div>
                     <div className="profile__bio">
-                        Charming code writer and cooking enthusiast
+                        {profUser.user.bio}
                     </div>
-                    <div className="profile__editBtnCont">
-                        <button className="profile__editBtn">Edit Profile</button>
-                    </div>
+                    {props.user.uid === profUser.id?(
+                        <div className="profile__editBtnCont">
+                            <button className="profile__editBtn" onClick={goToEdit}>Edit Profile</button>
+                        </div>
+                    ):''}
                 </div>
             </div>
             <div className="profile__feed">
@@ -129,7 +139,7 @@ const Profile = (props) => {
                 </div>
             </div>
         </div>
-    )
+    ):''
 }
 
 export default Profile
