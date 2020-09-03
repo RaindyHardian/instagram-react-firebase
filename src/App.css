@@ -75,7 +75,12 @@
 .post__headerUsername{
   font-size: 15px;
   color: rgb(39, 39, 39);
+  text-decoration: none;
 }
+.post__headerUsername:hover{
+  cursor: pointer;
+}
+
 .post__action{
   padding: 1px 10px;
   display: flex;
@@ -134,7 +139,7 @@
   border-bottom: 1px solid lightgray;
 }
 .post_likeListContainer{
-  padding: 10px 0;
+  padding: 10px;
   max-height: 500px;
   overflow-y: auto;
 }
@@ -163,7 +168,7 @@
   border-bottom: 1px solid lightgray;
 }
 .post_commentListContainer{
-  /* padding: 10px; */
+  padding: 10px 0;
   max-height: 500px;
   overflow-y: auto;
 }
@@ -349,6 +354,11 @@
   border: 1px solid rgb(180, 180, 180);
 }
 
+
+.usernameLink{
+  text-decoration: none;
+  color: rgb(39, 39, 39);
+}
 .font-bold{
   font-weight: bold;
 }

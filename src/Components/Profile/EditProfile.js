@@ -5,13 +5,16 @@ import {
 import { Avatar, TextField, CircularProgress } from '@material-ui/core';
 import firebase from "firebase"
 import {db, storage} from "../../firebase"
+import moment from 'moment'
 
 const EditProfile = (props) => {
     const history = useHistory()
     const [displayName, setDisplayName] = useState("")
     const [fullName, setFullName] = useState("")
     const [bio, setBio] = useState("")
-    const [avatarUrl, setAvatarUrl] = useState("")
+    const [photoUrl, setPhotoUrl] = useState(null)
+    const [imageUpload, setImageUpload] = useState(null)
+    const [imageUploadName, setImageUploadName] = useState("")
     const openDialogRef = useRef(null)
 
     const [isLoading, setIsLoading] = useState(true)
@@ -23,24 +26,68 @@ const EditProfile = (props) => {
                 setDisplayName(doc.data().displayName)
                 setFullName(doc.data().fullName)
                 setBio(doc.data().bio)
-                setAvatarUrl(doc.data().avatarUrl)
+                setPhotoUrl(doc.data().photoUrl)
                 setIsLoading(false)
             })
         }
     },[props.user.uid])
+
+    const handleImage = (e)=>{
+        if(e.target.files[0]){
+            var imageReader = new FileReader();
+            imageReader.readAsDataURL(e.target.files[0]);
+            imageReader.onload = function (oFREvent) {
+                setPhotoUrl(oFREvent.target.result)
+            };
+            setImageUpload(e.target.files[0])
+            setImageUploadName(e.target.files[0].name+moment().format())
+        }
+    }
     
     const submitProfile = ()=>{
         setSubmitLoading(true)
-        db.collection("users").doc(props.user.uid).set({
-            displayName: displayName,
-            fullName : fullName,
-            bio : bio
-        }).then(()=>{
-            setSubmitLoading(false)
-        }).catch(err=>{
-            console.log(err)
-            setSubmitLoading(false)
-        })
+        if(imageUpload!== null){
+            const uploadTask = storage.ref(`images/${imageUploadName}`).put(imageUpload)
+            uploadTask.on("state_changed", (snapshot)=>{},(error)=>{
+                // error function
+                console.log(error)
+                alert(error.message)
+            }, ()=>{
+                storage.ref("images").child(imageUploadName).getDownloadURL().then(url=>{
+                    var userProfile = firebase.auth().currentUser;
+                    userProfile.updateProfile({
+                        photoURL: url
+                    }).then(function() {
+                        // Update successful.
+                        db.collection("users").doc(props.user.uid).set({
+                            displayName: displayName,
+                            fullName : fullName,
+                            bio : bio,
+                            photoUrl : url
+                        }).then(()=>{
+                            setSubmitLoading(false)
+                        }).catch(err=>{
+                            console.log(err)
+                            setSubmitLoading(false)
+                        })
+                    }).catch(function(error) {
+                        // An error happened.
+                    });
+                })
+            })
+        } else{
+            db.collection("users").doc(props.user.uid).set({
+                displayName: displayName,
+                fullName : fullName,
+                bio : bio
+            }).then(()=>{
+                setSubmitLoading(false)
+            }).catch(err=>{
+                console.log(err)
+                setSubmitLoading(false)
+            })
+        }
+        
     }
 
     const backToProfile = ()=>{
@@ -72,12 +119,12 @@ const EditProfile = (props) => {
             </div>
             <div >
                 <form className="editProfile__form">
-                    <Avatar className="editProfile__avatar" alt={displayName} src="/static/images/avatar/1.jpg" />
+                    <Avatar className="editProfile__avatar" alt={displayName} src={photoUrl} />
                     <div className="editProfile__changepic" onClick={()=>openDialogRef.current.click()}>
                         Change Profile Picture
                     </div>
                     
-                    <input ref={openDialogRef} type="file" style={{display: 'none'}}/>
+                    <input ref={openDialogRef} type="file" onChange={handleImage} style={{display: 'none'}}/>
 
                     <TextField className="editProfile__input" id="standard-basic" label="Name" value={fullName} onChange={(e)=>setFullName(e.target.value)}/>
 
@@ -100,7 +147,7 @@ const EditProfile = (props) => {
                         disabled
                         id="standard-disabled"
                         label="Email Address"
-                        defaultValue="blabla@gmail.com"
+                        defaultValue={props.user.email}
                     />
                 </div>
             </div>

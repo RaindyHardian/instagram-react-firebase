@@ -18,7 +18,8 @@ const Home = (props) => {
                         id : doc.id,
                         post : doc.data(),
                         username : user.data().displayName,
-                        user_id : user.id
+                        user_id : user.id,
+                        photoUrl : user.data().photoUrl
                     }])  
                 })
             })
@@ -32,8 +33,8 @@ const Home = (props) => {
             ):(
                 <h3>You need to login to upload an image</h3>
             )} */}
-            {posts.map(({id, post, username, user_id})=>(
-                <Post key={id} postId={id} username={username} caption={post.caption} imageUrl={post.imageUrl} postUser_id={user_id} isLoggedIn={props.isLoggedIn} loggedInUser_id={props.isLoggedIn?loggedInUser_id:''}/>
+            {posts.map(({id, post, photoUrl, username, user_id})=>(
+                <Post key={id} postId={id} photoUrl={photoUrl} username={username} caption={post.caption} imageUrl={post.imageUrl} postUser_id={user_id} isLoggedIn={props.isLoggedIn} loggedInUser_id={props.isLoggedIn?loggedInUser_id:''}/>
             ))}            
         </div>
     )

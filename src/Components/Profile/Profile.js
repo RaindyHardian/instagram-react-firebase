@@ -25,14 +25,14 @@ const Profile = (props) => {
     useEffect(()=>{
         // set posts
         let reference = db.collection("users").doc(id);
-        reference.get().then(doc=>{
+        db.collection("users").doc(id).get().then(doc=>{
             setProfUser({
                 id: doc.id, 
                 user : doc.data()
             })
             setIsProfUserLoading(false)
         })
-        db.collection('posts').where("user_id", "==", reference).onSnapshot( async snapshot=>{
+        var unsubscribePosts = db.collection('posts').where("user_id", "==", reference).onSnapshot( async snapshot=>{
             try{
                 setPosts( await Promise.all(snapshot.docs.map( async doc=>{
                     let user = await doc.data().user_id.get()
@@ -41,13 +41,17 @@ const Profile = (props) => {
                         id : doc.id,
                         post : doc.data(),
                         username : user.data().displayName,
-                        user_id : user.id
+                        user_id : user.id,
+                        photoUrl : user.data().photoUrl
                     }
                 })))
             } catch (err){
                 console.log(err)
             }
         })
+        return ()=>{
+            unsubscribePosts()
+        }
     },[])
     const changeSection = (e)=>{
         if(e.target.attributes.name.value==="grid"){
@@ -73,7 +77,7 @@ const Profile = (props) => {
             </div>
             <div className="profile__info">
                 <div className="profile__infoA">
-                    <Avatar className="profile__avatar" alt={profUser.user.displayName} src="/static/images/avatar/1.jpg" />
+                    <Avatar className="profile__avatar" alt={profUser.user.displayName} src={profUser.user.photoUrl} />
                     <div className="profile__infoAB">
                         <div className="font-bold">{posts.length}</div>
                         <div>Post</div>
@@ -129,8 +133,8 @@ const Profile = (props) => {
                         </div>
                     ):(
                         <div>
-                            {posts.map(({id, post, username, user_id})=>(
-                                <Post key={id} postId={id} username={username} caption={post.caption} imageUrl={post.imageUrl} postUser_id={user_id} isLoggedIn={props.isLoggedIn} loggedInUser_id={props.isLoggedIn?props.user.uid:''}/>
+                            {posts.map(({id, post, photoUrl, username, user_id})=>(
+                                <Post key={id} postId={id} photoUrl={photoUrl} username={username} caption={post.caption} imageUrl={post.imageUrl} postUser_id={user_id} isLoggedIn={props.isLoggedIn} loggedInUser_id={props.isLoggedIn?props.user.uid:''}/>
                             ))}  
                         </div>
                     )}

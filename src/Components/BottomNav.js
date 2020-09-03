@@ -45,7 +45,7 @@ const BottomNav = (props) => {
                 <div className="BottomNav__divSVG">
                     {/* PROFILE */}
                     <Link to={"/profile/"+loggedInUser_id} className="BottomNav__link">
-                        <Avatar className="BottomNav__profile" alt={username} src="/static/images/avatar/1.jpg" />
+                        <Avatar className="BottomNav__profile" alt={username} src={props.user.photoURL} />
                     </Link>
                 </div>
             </div>

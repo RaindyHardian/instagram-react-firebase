@@ -1,4 +1,7 @@
 import React, {useState, useEffect} from 'react'
+import {
+    Link
+} from "react-router-dom";
 import { Avatar, Button, Input, CircularProgress, Menu, MenuItem,Modal } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import firebase from "firebase"
@@ -7,7 +10,7 @@ import { db } from '../firebase';
 // import {Menu} from '@material-ui/core';
 // import MenuItem from '@material-ui/core/MenuItem';
 
-const Post = ({postId, username, caption, imageUrl, postUser_id, isLoggedIn, loggedInUser_id}) => {
+const Post = ({postId, photoUrl, username, caption, imageUrl, postUser_id, isLoggedIn, loggedInUser_id}) => {
     const [comments, setComments] = useState([]);
     const [inputComment, setInputComment] = useState("");
     const [postLoading, setPostLoading] = useState(false);
@@ -36,27 +39,36 @@ const Post = ({postId, username, caption, imageUrl, postUser_id, isLoggedIn, log
         // console.log(postId)
         if(postId){
             // set comments
-            db.collection("posts").doc(postId).collection("comments").orderBy('timestamp', 'asc').onSnapshot( async snapshot=>{
+            var unsubscribeComments = db.collection("posts").doc(postId).collection("comments").orderBy('timestamp', 'asc').onSnapshot( async snapshot=>{
                 setComments(await Promise.all(snapshot.docs.map(async doc=>{
                     let user = await doc.data().user_id.get()
                     return {
                         id : doc.id,
                         comment : doc.data(),
                         username : user.data().displayName,
-                        user_id : user.id
+                        user_id : user.id,
+                        photoUrl : user.data().photoUrl
                     }
                 })))
             })
+            
+            
             // set likes
-            db.collection("posts").doc(postId).collection("likes").onSnapshot(async snapshot=>{
+            var unsubscribeLikes = db.collection("posts").doc(postId).collection("likes").onSnapshot(async snapshot=>{
                 setLikes(await Promise.all(snapshot.docs.map(async doc=>{
                     let user = await doc.data().user_id.get()
                     return {
                         id: doc.id,
-                        username : user.data().displayName 
+                        username : user.data().displayName,
+                        user_id : user.id,
+                        photoUrl : user.data().photoUrl 
                     }
                 })))
             })
+        }
+        return ()=>{
+            unsubscribeComments()
+            unsubscribeLikes()
         }
     },[])
 
@@ -141,8 +153,14 @@ const Post = ({postId, username, caption, imageUrl, postUser_id, isLoggedIn, log
         <div className="post">
             <div className="post__header">
                 <div className="post__profile">
-                    <Avatar className="post__avatar" alt={username} src="/static/images/avatar/1.jpg" />
-                    <h3 className="post__headerUsername">{username}</h3>        
+                    <Avatar className="post__avatar" alt={username} src={photoUrl} />
+                    
+                    <h3>
+                        <Link to={"/profile/"+postUser_id} className="post__headerUsername">
+                            {username}
+                        </Link> 
+                    </h3>
+                           
                 </div>
                 <div className="post__menu" aria-controls="simple-menu" aria-haspopup="true" onClick={dotClick}>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -178,7 +196,12 @@ const Post = ({postId, username, caption, imageUrl, postUser_id, isLoggedIn, log
                 <strong>{likes.length} Likes</strong>
             </h4>
             {/* username + caption */}
-            <h4 className="post__text font-gray"><strong>{username}</strong> {caption}</h4>
+            <h4 className="post__text font-gray">
+                <Link to={"/profile/"+postUser_id} className="usernameLink">
+                    <strong>{username}</strong> 
+                </Link>
+                {" "+caption}
+            </h4>
             {/* COMMENT SECTION */}
             {comments.length!==0?(
                 <>
@@ -188,7 +211,10 @@ const Post = ({postId, username, caption, imageUrl, postUser_id, isLoggedIn, log
                     </p>
                 ):''}
                 <p className="post__text font-gray">
-                    <strong>{comments[comments.length-1].username}</strong> {comments[comments.length-1].comment.text}
+                    <Link to={"/profile/"+comments[comments.length-1].user_id} className="usernameLink">
+                        <strong>{comments[comments.length-1].username}</strong>
+                    </Link>
+                    {" "+comments[comments.length-1].comment.text}
                 </p>
                 </>
             ):''}
@@ -214,15 +240,23 @@ const Post = ({postId, username, caption, imageUrl, postUser_id, isLoggedIn, log
                     <div className="post__commentTitle font-gray font-bold">
                         Comments
                     </div>
-                    <div className="post_likeListContainer">
+                    <div className="post_commentListContainer">
                         {/* username + caption */}
                         <div className="post__modalCaption">
-                            <h4 className="post__text font-gray"><strong>{username}</strong> {caption}</h4>
+                            <h4 className="post__text font-gray">
+                                <Link to={"/profile/"+postUser_id} className="usernameLink">
+                                    <strong>{username}</strong> 
+                                </Link>
+                                 {" "+caption}
+                            </h4>
                         </div>
                         {/* Comment section */}
-                        {comments.map(({id, comment,username})=>(
+                        {comments.map(({id, comment,username, user_id})=>(
                             <h4 className="post__text font-gray" key={id}>
-                                <strong>{username}</strong> {comment.text}
+                                <Link to={"/profile/"+user_id} className="usernameLink">
+                                    <strong>{username}</strong> 
+                                </Link>
+                                 {" "+comment.text}
                             </h4>
                         ))}
                         {isLoggedIn?(
@@ -253,8 +287,10 @@ const Post = ({postId, username, caption, imageUrl, postUser_id, isLoggedIn, log
                     <div className="post_likeListContainer">
                     {likes.map(like=>(
                         <div key={like.id } className="post__likeListItem">
-                            <Avatar className="post__avatar" alt={like.username} src="/static/images/avatar/1.jpg" />
-                            <div className="font-gray font-bold">{like.username}</div>
+                            <Avatar className="post__avatar" alt={like.username} src={like.photoUrl}/>
+                            <Link to={"/profile/"+like.user_id} className="usernameLink">
+                                <div className="font-gray font-bold">{like.username}</div>
+                            </Link>
                         </div>
                     ))}
                     </div>

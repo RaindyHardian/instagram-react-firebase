@@ -1,7 +1,8 @@
 import React, {useState, useEffect} from 'react'
 import {
     useHistory,
-    useParams
+    useParams,
+    Link
 } from "react-router-dom";
 import { Avatar, Modal, CircularProgress, Menu, MenuItem } from "@material-ui/core";
 import firebase from 'firebase'
@@ -35,20 +36,21 @@ const SinglePost = (props) => {
 
     useEffect(() => {
         // set post
-        db.collection("posts").doc(id).onSnapshot( async doc=>{
+        var unsubscribePosts = db.collection("posts").doc(id).onSnapshot( async doc=>{
             // console.log(snapshot.data())
             let user = await doc.data().user_id.get()
             setPost({
                 id : doc.id,
                 post : doc.data(),
                 username : user.data().displayName,
-                user_id : user.id
+                user_id : user.id,
+                photoUrl : user.data().photoUrl
             })
             setIsLoading(false)
         })
 
         // set comments
-        db.collection("posts").doc(id).collection("comments").orderBy('timestamp', 'asc').onSnapshot( async snapshot=>{
+        var unsubscribeComments = db.collection("posts").doc(id).collection("comments").orderBy('timestamp', 'asc').onSnapshot( async snapshot=>{
             setComments(await Promise.all(snapshot.docs.map(async doc=>{
                 let user = await doc.data().user_id.get()
                 return {
@@ -60,7 +62,7 @@ const SinglePost = (props) => {
             })))
         })
         // set likes
-        db.collection("posts").doc(id).collection("likes").onSnapshot(async snapshot=>{
+        var unsubscribeLikes = db.collection("posts").doc(id).collection("likes").onSnapshot(async snapshot=>{
             setLikes(await Promise.all(snapshot.docs.map(async doc=>{
                 let user = await doc.data().user_id.get()
                 return {
@@ -69,6 +71,11 @@ const SinglePost = (props) => {
                 }
             })))
         })
+        return ()=>{
+            unsubscribePosts()
+            unsubscribeComments()
+            unsubscribeLikes()
+        }
     }, [])
 
     useEffect(()=>{
@@ -152,8 +159,13 @@ const SinglePost = (props) => {
         <div className="singlePost">
             <div className="post__header">
                 <div className="post__profile">
-                    <Avatar className="post__avatar" alt={post.username} src="/static/images/avatar/1.jpg" />
-                    <h3 className="post__headerUsername">{post.username}</h3>        
+                    <Avatar className="post__avatar" alt={post.username} src={post.photoUrl} />
+                    
+                    <h3>
+                        <Link to={"/profile/"+post.user_id} className="post__headerUsername">
+                            {post.username}
+                        </Link> 
+                    </h3>   
                 </div>
                 <div className="post__menu" aria-controls="simple-menu" aria-haspopup="true" onClick={dotClick}>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
