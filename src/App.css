@@ -49,6 +49,15 @@
   padding: 1px 10px;
   font-size: 15px;
 }
+.post__timestamp{
+  padding: 0 10px;
+  font-size: 13px;
+  color: rgb(59, 59, 59);
+}
+.post__modalTimestamp{
+  font-size: 13px;
+  color: rgb(59, 59, 59);
+}
 .post__header{
   display:flex;
   justify-content: space-between;

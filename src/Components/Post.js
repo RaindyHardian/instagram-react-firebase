@@ -6,11 +6,12 @@ import { Avatar, Button, Input, CircularProgress, Menu, MenuItem,Modal } from '@
 import { makeStyles } from '@material-ui/core/styles';
 import firebase from "firebase"
 import { db } from '../firebase';
+import moment from "moment"
 
 // import {Menu} from '@material-ui/core';
 // import MenuItem from '@material-ui/core/MenuItem';
 
-const Post = ({postId, photoUrl, username, caption, imageUrl, postUser_id, isLoggedIn, loggedInUser_id}) => {
+const Post = ({postId, photoUrl, username, caption, imageUrl, timestamp, postUser_id, isLoggedIn, loggedInUser_id}) => {
     const [comments, setComments] = useState([]);
     const [inputComment, setInputComment] = useState("");
     const [postLoading, setPostLoading] = useState(false);
@@ -181,7 +182,7 @@ const Post = ({postId, photoUrl, username, caption, imageUrl, postUser_id, isLog
 
             {/* image */}
             <img className="post__image" src={imageUrl} alt=""/>
-            
+            {/* Likes and comment button */}
             <div className="post__action">
                 <div className="post__actionSVG" onClick={submitLike}>
                     {likeSVG}
@@ -202,6 +203,7 @@ const Post = ({postId, photoUrl, username, caption, imageUrl, postUser_id, isLog
                 </Link>
                 {" "+caption}
             </h4>
+            
             {/* COMMENT SECTION */}
             {comments.length!==0?(
                 <>
@@ -218,6 +220,7 @@ const Post = ({postId, photoUrl, username, caption, imageUrl, postUser_id, isLog
                 </p>
                 </>
             ):''}
+            
             {isLoggedIn?(
                 <div className="post__comment">
                     <input type="text" className="post__commentInput" placeholder="Add a comment..." value={inputComment} onChange={(e)=>setInputComment(e.target.value)}/>
@@ -230,6 +233,8 @@ const Post = ({postId, photoUrl, username, caption, imageUrl, postUser_id, isLog
                     )}
                 </div>
             ):''}
+            {/* Post timestamp */}
+            <p className="post__timestamp">{moment(timestamp.toDate().toString()).fromNow()}</p>
             
             {/* View All Comments Modal */}
             <Modal
@@ -247,7 +252,8 @@ const Post = ({postId, photoUrl, username, caption, imageUrl, postUser_id, isLog
                                 <Link to={"/profile/"+postUser_id} className="usernameLink">
                                     <strong>{username}</strong> 
                                 </Link>
-                                 {" "+caption}
+                                {" "+caption}
+                                <p className="post__modalTimestamp">{moment(timestamp.toDate().toString()).fromNow()}</p>
                             </h4>
                         </div>
                         {/* Comment section */}
@@ -257,7 +263,9 @@ const Post = ({postId, photoUrl, username, caption, imageUrl, postUser_id, isLog
                                     <strong>{username}</strong> 
                                 </Link>
                                  {" "+comment.text}
+                                 <p className="post__modalTimestamp">{moment(comment.timestamp.toDate().toString()).fromNow()}</p>
                             </h4>
+                            
                         ))}
                         {isLoggedIn?(
                             <div className="post__comment">

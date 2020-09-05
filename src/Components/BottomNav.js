@@ -10,6 +10,9 @@ const BottomNav = (props) => {
     if(props.isLoggedIn){
         loggedInUser_id = props.user.uid;
     }
+    const notLoggedIn = ()=>{
+        alert("Please login to view this page")
+    }
     
     return (
         <div className="BottomNav">
@@ -30,11 +33,17 @@ const BottomNav = (props) => {
                 </div>
                 <div className="BottomNav__divSVG">
                     {/* ADD/UPLOAD */}
-                    <Link to="/upload" className="BottomNav__link">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    {props.isLoggedIn?(
+                        <Link to="/upload" className="BottomNav__link">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </Link>
+                    ):(
+                        <svg  onClick={notLoggedIn} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path  onClick={notLoggedIn} strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                    </Link>
+                    )}
                 </div>
                 <div className="BottomNav__divSVG">
                     {/* LOVE/ACTIVITY */}
@@ -44,9 +53,14 @@ const BottomNav = (props) => {
                 </div>
                 <div className="BottomNav__divSVG">
                     {/* PROFILE */}
-                    <Link to={"/profile/"+loggedInUser_id} className="BottomNav__link">
-                        <Avatar className="BottomNav__profile" alt={username} src={props.user.photoURL} />
-                    </Link>
+                    {props.isLoggedIn?(
+                        <Link to={"/profile/"+loggedInUser_id} className="BottomNav__link">
+                            <Avatar className="BottomNav__profile" alt={username} src={props.user.photoURL} />
+                        </Link>
+                    ):(
+                        <Avatar className="BottomNav__profile" onClick={notLoggedIn}/>
+                    )}
+                    
                 </div>
             </div>
         </div>

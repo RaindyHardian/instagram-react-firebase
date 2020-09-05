@@ -134,7 +134,7 @@ const Profile = (props) => {
                     ):(
                         <div>
                             {posts.map(({id, post, photoUrl, username, user_id})=>(
-                                <Post key={id} postId={id} photoUrl={photoUrl} username={username} caption={post.caption} imageUrl={post.imageUrl} postUser_id={user_id} isLoggedIn={props.isLoggedIn} loggedInUser_id={props.isLoggedIn?props.user.uid:''}/>
+                                <Post key={id} postId={id} photoUrl={photoUrl} username={username} caption={post.caption} imageUrl={post.imageUrl} timestamp={post.timestamp} postUser_id={user_id} isLoggedIn={props.isLoggedIn} loggedInUser_id={props.isLoggedIn?props.user.uid:''}/>
                             ))}  
                         </div>
                     )}

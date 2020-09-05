@@ -7,6 +7,7 @@ import {
 import { Avatar, Modal, CircularProgress, Menu, MenuItem } from "@material-ui/core";
 import firebase from 'firebase'
 import {db} from "../../firebase"
+import moment from "moment"
 
 const SinglePost = (props) => {
     let { id } = useParams();
@@ -199,12 +200,20 @@ const SinglePost = (props) => {
             </div>
             <h4 className="post__text font-gray" onClick={()=>setModalLikeOpen(true)}><strong>{likes.length} Likes</strong></h4>
             {/* username + caption */}
-            {!isLoading?<h4 className="post__text font-gray"><strong>{post.username}</strong> {post.post.caption}</h4>:''}
+            {!isLoading?(
+                <>
+                <h4 className="post__text font-gray"><strong>{post.username}</strong> {post.post.caption}</h4>
+                {/* Post timestamp */}
+                <p className="post__timestamp">{moment(post.post.timestamp.toDate().toString()).fromNow()}</p>
+                </>
+            ):''}
             
             {/* Comment section */}
             {comments.map(({id, comment,username})=>(
                 <h4 className="post__text font-gray" key={id}>
                     <strong>{username}</strong> {comment.text}
+                    {/* Post timestamp */}
+                    <p className="post__modalTimestamp">{moment(comment.timestamp.toDate().toString()).fromNow()}</p>
                 </h4>
             ))}
             {props.isLoggedIn?(

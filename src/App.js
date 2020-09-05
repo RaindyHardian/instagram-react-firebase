@@ -191,7 +191,7 @@ function App() {
           <Home user={user} isLoggedIn={isLoggedIn}/>
         </Route>
         <Route exact path="/upload">
-          <ImageUpload/>
+          <ImageUpload user_id={user.uid} isLoggedIn={isLoggedIn}/>
         </Route>
         <Route exact path="/profile/:id">
           <Profile user={user} isLoggedIn={isLoggedIn}/>

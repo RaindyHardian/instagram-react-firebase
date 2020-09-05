@@ -1,20 +1,25 @@
 import React,{useState} from 'react'
-import { Button } from '@material-ui/core';
+import { CircularProgress, Button } from '@material-ui/core';
 import firebase from "firebase"
 import {db, storage} from '../firebase'
+import moment from 'moment'
 
 const ImageUpload = ({username, user_id}) => {
     const [caption, setCaption] = useState("")
     const [image, setImage] = useState(null)
-    const [progress, setProgress] = useState(0)
+    const [imageName, setImageName] = useState("");
+    const [progress, setProgress] = useState(0);
+    const [postLoading, setPostLoading] = useState(false)
     
     const handleChange = (e)=>{
         if(e.target.files[0]){
             setImage(e.target.files[0])
+            setImageName(e.target.files[0].name+moment().format())
         }
     }
     const handleUpload = ()=>{
-        const uploadTask = storage.ref(`images/${image.name}`).put(image)
+        setPostLoading(true)
+        const uploadTask = storage.ref(`images/${imageName}`).put(image)
 
         uploadTask.on("state_changed", (snapshot)=>{
             // progress function
@@ -26,7 +31,7 @@ const ImageUpload = ({username, user_id}) => {
             alert(error.message)
         }, ()=>{
             // complete function
-            storage.ref("images").child(image.name).getDownloadURL().then(url=>{
+            storage.ref("images").child(imageName).getDownloadURL().then(url=>{
                 // post image to firestore db
                 db.collection("posts").add({
                     timestamp: firebase.firestore.FieldValue.serverTimestamp(),
@@ -38,6 +43,7 @@ const ImageUpload = ({username, user_id}) => {
                 })
 
                 setProgress(0);
+                setPostLoading(false)
                 setCaption("");
                 setImage(null);
             })
@@ -49,9 +55,12 @@ const ImageUpload = ({username, user_id}) => {
             <progress className="imageupload__progress" value={progress} max="100"/>
             <input type="text" placeholder="enter caption" value={caption} onChange={(e)=>setCaption(e.target.value)}/>
             <input type="file" onChange={handleChange}/>
-            <Button onClick={handleUpload}>
-                Upload
-            </Button>
+            {!postLoading?(
+                <Button onClick={handleUpload}>
+                    Upload
+                </Button>
+            ):(<CircularProgress/>)}
+            
         </div>
     )
 }

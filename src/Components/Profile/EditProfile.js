@@ -47,6 +47,7 @@ const EditProfile = (props) => {
     const submitProfile = ()=>{
         setSubmitLoading(true)
         if(imageUpload!== null){
+            console.log("MASUK IF")
             const uploadTask = storage.ref(`images/${imageUploadName}`).put(imageUpload)
             uploadTask.on("state_changed", (snapshot)=>{},(error)=>{
                 // error function
@@ -76,7 +77,8 @@ const EditProfile = (props) => {
                 })
             })
         } else{
-            db.collection("users").doc(props.user.uid).set({
+            console.log("MASUK ELSE")
+            db.collection("users").doc(props.user.uid).update({
                 displayName: displayName,
                 fullName : fullName,
                 bio : bio
