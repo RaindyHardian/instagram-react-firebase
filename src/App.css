@@ -197,8 +197,29 @@
 .imageupload{
   display: flex;
   flex-direction: column;
-  width: 60%;
+  width: 75%;
   margin: 10px auto;
+  align-items: center;
+}
+.imageUpload__preview{
+  object-fit: contain;
+  width: 100%;
+  margin-bottom: 10px;
+}
+.imageupload__progress{
+  margin-bottom: 10px;
+  width: 100%;
+}
+.imageupload__input{
+  margin-bottom: 20px !important;
+  width: 100%;
+}
+.imageupload__file{
+  margin-bottom: 10px;
+  width: 100%;
+}
+.imageupload__button{
+  font-weight: bold !important;
 }
 
 .profile{

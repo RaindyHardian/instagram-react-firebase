@@ -21,7 +21,7 @@ import EditProfile from './Components/Profile/EditProfile';
 function App() {
   const classes = useStyles();
   const [modalStyle] = useState(getModalStyle);
-  
+
   const [open, setOpen] = useState(false)
   const [openSignIn, setOpenSignIn] = useState(false)
   const [username, setUsername] = useState("")
@@ -90,6 +90,7 @@ function App() {
     auth.signOut()
     setIsLoggedIn(false)
   }
+
   return (
     <Router>
     <div className="app">
@@ -159,11 +160,13 @@ function App() {
       </Modal>
 
       <div className="app__header">
-         <img
-          className="app__headerImage"
-          src="https://www.instagram.com/static/images/web/mobile_nav_type_logo.png/735145cfe0a4.png"
-          alt=""
-         />
+        <Link to="/" style={{display: "flex"}}>
+          <img
+            className="app__headerImage"
+            src="https://www.instagram.com/static/images/web/mobile_nav_type_logo.png/735145cfe0a4.png"
+            alt=""
+          />
+        </Link>
          {
           isLoading?'':(
             isLoggedIn?(
