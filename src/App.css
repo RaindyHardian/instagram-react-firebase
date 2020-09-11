@@ -361,6 +361,7 @@
   position: fixed;
   width: 100%;
   bottom: 0;
+  left: 0;
   background-color: rgb(245, 245, 245);
   padding: 10px 0;
   border-top: 1px solid lightgray;
@@ -384,6 +385,27 @@
   border: 1px solid rgb(180, 180, 180);
 }
 
+.search__form{
+  /* background: rgb(248, 248, 248); */
+  padding: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid lightgray;
+}
+.search__input{
+  width: 100%;
+  border: 0;
+  font-size: 15px;
+}
+.search__item{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 10px;
+}
+.search__avatar{
+  margin-right: 10px; 
+}
+
 
 .usernameLink{
   text-decoration: none;
@@ -394,4 +416,110 @@
 }
 .font-gray{
   color: rgb(39, 39, 39);
+}
+
+@media (min-width: 768px){
+  body{
+    background: rgb(245, 245, 245);
+  }
+  .app__header{
+    padding: 15px 50px 10px 50px;
+  }
+  .app__headerRight{
+    display: flex;
+  }
+  .BottomNav{
+    position: unset;
+    width: unset;
+    background-color: unset;
+    padding: 0;
+    border-top: 0;
+  }
+  .BottomNav__divSVG{
+    margin-right: 15px;
+  }
+  .BottomNav__divSVG:hover{
+    cursor: pointer;
+  }
+  .app__container{
+    background: rgb(245, 245, 245);
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+  }
+  .home{
+    background: unset;
+  }
+  .post{
+    border: 1px solid lightgray;
+    border-radius: 5px;
+    padding-bottom: 20px;
+    margin-top: 30px;
+  }
+  .post__header{
+    border-radius: 5px;
+  }
+
+  .imageupload{
+    width: 60%;
+    background-color: white;
+    padding: 20px;
+    border: 1px solid lightgray;
+    border-radius: 5px;
+  }
+  .imageUpload__preview{
+    width: 60%;
+  }
+
+  .profile{
+    background-color: unset;  
+    max-width: 700px;
+  }
+  .profile__feedNav{
+    margin-bottom: 10px;
+  }
+  .profile__avatar{
+    width: 120px !important;
+    height: 120px !important;
+    border: 1px solid lightgray;
+  }
+  .profile__feedGrid{
+    grid-gap: 10px;
+  }
+  .editProfile{
+    min-width: 700px;
+    background: white;
+    margin-top: 20px;
+    padding: 10px 20px 50px 20px;
+    border: 1px solid lightgray;
+    border-radius: 5px;
+  }
+  .editProfile__header{
+    background: white;
+    border: 0;
+    box-shadow: unset;
+  }
+  .singlePost{
+    background: white;
+    padding-bottom: 20px;
+    border: 1px solid lightgray;
+    margin-top: 30px;
+    border-radius: 5px;
+  }
+
+  .search{
+    background: white;
+    border: 1px solid lightgray;
+    border-radius: 5px;
+    min-width: 500px;
+    min-height: 250px;
+    margin-top: 20px;
+    padding-bottom: 20px;
+  }
+  .search__form{
+    padding: 10px 20px;
+  }
+  .search__item{
+    padding: 10px 20px;
+  }
 }

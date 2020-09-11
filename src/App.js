@@ -17,6 +17,7 @@ import Post from './Components/Post';
 import Profile from './Components/Profile/Profile';
 import SinglePost from './Components/Profile/SinglePost';
 import EditProfile from './Components/Profile/EditProfile';
+import Search from './Components/search/Search';
 
 function App() {
   const classes = useStyles();
@@ -170,9 +171,13 @@ function App() {
          {
           isLoading?'':(
             isLoggedIn?(
-              <Button onClick={signOut}>Log out</Button>
+              <div className="app__headerRight">
+                <BottomNav user={user} isLoggedIn={isLoggedIn}/>
+                <Button onClick={signOut}>Log out</Button>
+              </div>
             ):(
-              <div>
+              <div className="app__headerRight">
+                <BottomNav user={user} isLoggedIn={isLoggedIn}/>
                 <Button onClick={()=>setOpenSignIn(true)}>Sign In</Button>
                 <Button onClick={()=>setOpen(true)}>Sign Up</Button>
               </div>
@@ -196,6 +201,9 @@ function App() {
         <Route exact path="/upload">
           <ImageUpload user_id={user.uid} isLoggedIn={isLoggedIn}/>
         </Route>
+        <Route exact path="/search">
+          <Search user_id={user.uid} isLoggedIn={isLoggedIn}/>
+        </Route>
         <Route exact path="/profile/:id">
           <Profile user={user} isLoggedIn={isLoggedIn}/>
         </Route>
@@ -207,10 +215,10 @@ function App() {
         </Route>
       </Switch>
       </div>
-      {isLoading?'':(
+      {/* {isLoading?'':(
         <BottomNav user={user} isLoggedIn={isLoggedIn}/>
-      )}
-      
+      )} */}
+
     </div>
     </Router>
   );
