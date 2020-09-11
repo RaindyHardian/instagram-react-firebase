@@ -193,7 +193,7 @@ const Post = ({postId, photoUrl, username, caption, imageUrl, timestamp, postUse
                     </svg>
                 </div>
             </div>
-            <h4 className="post__text font-gray" onClick={()=>setModalLikeOpen(true)}>
+            <h4 className="post__likeText post__text font-gray" onClick={()=>setModalLikeOpen(true)}>
                 <strong>{likes.length} Likes</strong>
             </h4>
             {/* username + caption */}
@@ -248,23 +248,29 @@ const Post = ({postId, photoUrl, username, caption, imageUrl, timestamp, postUse
                     <div className="post_commentListContainer">
                         {/* username + caption */}
                         <div className="post__modalCaption">
-                            <h4 className="post__text font-gray">
-                                <Link to={"/profile/"+postUser_id} className="usernameLink">
-                                    <strong>{username}</strong> 
-                                </Link>
-                                {" "+caption}
-                                <p className="post__modalTimestamp">{moment(timestamp.toDate().toString()).fromNow()}</p>
-                            </h4>
+                            <div className="post__modalCommentItem post__text font-gray">
+                                <Avatar className="post__avatar" alt={username} src={photoUrl}/>
+                                <div>
+                                    <Link to={"/profile/"+postUser_id} className="usernameLink">
+                                        <strong>{username}</strong> 
+                                    </Link>
+                                    {" "+caption}
+                                    <p className="post__modalTimestamp">{moment(timestamp.toDate().toString()).fromNow()}</p>
+                                </div>
+                            </div>
                         </div>
                         {/* Comment section */}
-                        {comments.map(({id, comment,username, user_id})=>(
-                            <h4 className="post__text font-gray" key={id}>
-                                <Link to={"/profile/"+user_id} className="usernameLink">
-                                    <strong>{username}</strong> 
-                                </Link>
-                                 {" "+comment.text}
-                                 <p className="post__modalTimestamp">{moment(comment.timestamp.toDate().toString()).fromNow()}</p>
-                            </h4>
+                        {comments.map(({id, comment,username, user_id,photoUrl})=>(
+                            <div className="post__modalCommentItem post__text font-gray" key={id}>
+                                <Avatar className="post__avatar" alt={username} src={photoUrl}/>
+                                <div>
+                                    <Link to={"/profile/"+user_id} className="usernameLink">
+                                        <strong>{username}</strong> 
+                                    </Link>
+                                    {" "+comment.text}
+                                    <p className="post__modalTimestamp">{moment(comment.timestamp.toDate().toString()).fromNow()}</p>
+                                 </div>
+                            </div>
                             
                         ))}
                         {isLoggedIn?(

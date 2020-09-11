@@ -2,7 +2,7 @@ import React,{useState} from 'react'
 import {
     useHistory
 } from "react-router-dom";
-import { CircularProgress, Button, TextField } from '@material-ui/core';
+import { CircularProgress, Button, TextField, LinearProgress } from '@material-ui/core';
 import firebase from "firebase"
 import {db, storage} from '../firebase'
 import moment from 'moment'
@@ -73,8 +73,8 @@ const ImageUpload = ({username, user_id}) => {
                 src={imagePreview}
                 alt=""
             />
-            <progress className="imageupload__progress" value={progress} max="100"/>
-            
+            {/* <progress className="imageupload__progress" value={progress} max="100"/> */}
+            <LinearProgress className="imageupload__progress" variant="determinate"  value={progress} />
             <input type="file" className="imageupload__file" onChange={handleChange}/>
             <TextField
                 className="imageupload__input"
@@ -85,6 +85,7 @@ const ImageUpload = ({username, user_id}) => {
                 value={caption}
                 onChange={(e)=>setCaption(e.target.value)}
             />
+            
             {!postLoading?(
                 <Button variant="contained" color="default" onClick={handleUpload} className="imageupload__button">
                     Upload

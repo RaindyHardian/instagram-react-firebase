@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";import {
+  useHistory
+} from "react-router-dom";
 import { Avatar } from "@material-ui/core";
 import {db} from "../../firebase"
 
 const Search = () => {
+  const history = useHistory();
   const [input, setInput] = useState("");
   const [search, setSearch] = useState([]);
   useEffect(() => {
@@ -20,6 +23,9 @@ const Search = () => {
     // }
     // s()
   }, [input]);
+  const visitProfile = (e)=>{
+    history.push('/profile/'+e.target.attributes.user_id.value)
+  }
   return (
     <div className="search">
       {/* SEARCH BAR */}
@@ -40,7 +46,7 @@ const Search = () => {
           </center>
         ):(
           search.map(({id,data})=>(
-            <div className="search__item" key={id}>
+            <div className="search__item" key={id} user_id={id} onClick={visitProfile}>
               <Avatar className="search__avatar" src={data.photoUrl}/>
               <div>{data.displayName}</div>
             </div>
