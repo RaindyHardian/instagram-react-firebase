@@ -6,6 +6,7 @@ import {
 import { Avatar } from "@material-ui/core";
 import {db} from "../../firebase"
 import Post from "../Post";
+import GetViewport from "../../utils/GetViewport"
 
 const Profile = (props) => {
     let { id } = useParams();
@@ -13,6 +14,7 @@ const Profile = (props) => {
     const [profUser, setProfUser] = useState({})
     const [posts, setPosts] = useState([])
     const picRef = useRef(null);
+    const dimensions = GetViewport()
 
     const [isProfUserLoading, setIsProfUserLoading]= useState(true)
     const [isPostLoading, setIsPostLoading] = useState(true);
@@ -53,6 +55,7 @@ const Profile = (props) => {
             unsubscribePosts()
         }
     },[])
+
     const changeSection = (e)=>{
         if(e.target.attributes.name.value==="grid"){
             setGridSectionClass("profile__feedNavIconCont feedNavIcon_active")
@@ -73,7 +76,14 @@ const Profile = (props) => {
     return !isProfUserLoading&&!isPostLoading?(
         <div className="profile">
             <div className="profile__head">
-                <div className="font-bold font-gray">{profUser.user.displayName}</div>
+                <div className="profile__displayName font-bold font-gray">{profUser.user.displayName}</div>
+                {dimensions.innerWidth>=768?(
+                    props.user.uid === profUser.id?(
+                        <div className="profile__editBtnCont">
+                            <button className="profile__editBtn" onClick={goToEdit}>Edit Profile</button>
+                        </div>
+                    ):null
+                ):null}
             </div>
             <div className="profile__info">
                 <div className="profile__infoA">
@@ -98,11 +108,13 @@ const Profile = (props) => {
                     <div className="profile__bio">
                         {profUser.user.bio}
                     </div>
-                    {props.user.uid === profUser.id?(
-                        <div className="profile__editBtnCont">
-                            <button className="profile__editBtn" onClick={goToEdit}>Edit Profile</button>
-                        </div>
-                    ):''}
+                    {dimensions.innerWidth<768?(
+                        props.user.uid === profUser.id?(
+                            <div className="profile__editBtnCont">
+                                <button className="profile__editBtn" onClick={goToEdit}>Edit Profile</button>
+                            </div>
+                        ):null
+                    ):null}
                 </div>
             </div>
             <div className="profile__feed">

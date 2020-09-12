@@ -15,6 +15,7 @@ const Post = ({postId, photoUrl, username, caption, imageUrl, timestamp, postUse
     const [comments, setComments] = useState([]);
     const [inputComment, setInputComment] = useState("");
     const [postLoading, setPostLoading] = useState(false);
+    const [imgLoading, setImgLoading] = useState(true)
     const [anchorEl, setAnchorEl] = useState(null);
     const [likes, setLikes] = useState([])
     
@@ -86,6 +87,10 @@ const Post = ({postId, photoUrl, username, caption, imageUrl, timestamp, postUse
             }
         })
     },[likes, isLoggedIn])
+
+    const imageLoaded = ()=>{
+        setImgLoading(false)
+    }
 
     const postComment = ()=>{
         setPostLoading(true)
@@ -181,7 +186,9 @@ const Post = ({postId, photoUrl, username, caption, imageUrl, timestamp, postUse
             </div>
 
             {/* image */}
-            <img className="post__image" src={imageUrl} alt=""/>
+            <img style={{display: imgLoading?'none':'initial'}} className="post__image" src={imageUrl} alt="" onLoad={imageLoaded}/>
+            <div style={{display: imgLoading?'flex':'none'}} className="post__image post__imageLoading">Loading...</div>
+
             {/* Likes and comment button */}
             <div className="post__action">
                 <div className="post__actionSVG" onClick={submitLike}>
