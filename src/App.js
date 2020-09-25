@@ -18,6 +18,7 @@ import Profile from './Components/Profile/Profile';
 import SinglePost from './Components/Profile/SinglePost';
 import EditProfile from './Components/Profile/EditProfile';
 import Search from './Components/search/Search';
+import Activity from './Components/activity/Activity';
 
 function App() {
   const classes = useStyles();
@@ -203,6 +204,9 @@ function App() {
         </Route>
         <Route exact path="/search">
           <Search user_id={user.uid} isLoggedIn={isLoggedIn}/>
+        </Route>
+        <Route exact path="/activity">
+          <Activity user_id={user.uid} isLoggedIn={isLoggedIn}/>
         </Route>
         <Route exact path="/profile/:id">
           <Profile user={user} isLoggedIn={isLoggedIn}/>

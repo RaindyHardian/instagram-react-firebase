@@ -442,6 +442,43 @@ body{
 .search__avatar{
   margin-right: 10px; 
 }
+/* ACTIVITY */
+.activity__header{
+  padding: 10px;
+  border-bottom: 1px solid lightgray;
+  background-color: rgb(252, 252, 252);
+}
+.activity__content{
+  padding: 10px;
+}
+.activity__item{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+}
+.activity__left{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-right: 10px;
+}
+.activity__avatar{
+  width: 50px !important;
+  height: 50px !important;
+  margin-right: 10px;
+}
+.activity__description{
+  font-size: 14px;
+  max-width: 250px;
+}
+.activity__preview{
+  width: 50px;
+  height: 50px;
+  background-color: rgb(233, 233, 233);
+  border-radius: 5px;
+}
 
 
 .usernameLink{
@@ -559,6 +596,8 @@ body{
     border: 1px solid lightgray;
     margin-top: 30px;
     border-radius: 5px;
+    min-width: 500px;
+    max-width: 500px;
   }
 
   .search{
@@ -579,5 +618,17 @@ body{
   }
   .search__noresult{
     padding-top: 10px;
+  }
+  .activity{
+    border: 1px solid lightgray;
+    background: white;
+    border-radius: 5px;
+    margin-top: 20px;
+    min-width: 500px;
+    max-width: 500px;
+  }
+  .activity__description{
+    font-size: 15px;
+    max-width: 300px;
   }
 }
