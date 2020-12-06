@@ -34,11 +34,11 @@ const Profile = (props) => {
             })
             setIsProfUserLoading(false)
         })
-        var unsubscribePosts = db.collection('posts').where("user_id", "==", reference).onSnapshot( async snapshot=>{
+        var unsubscribePosts = db.collection('posts').where("user_id", "==", reference).get().then( async snapshot=>{
             try{
                 setPosts( await Promise.all(snapshot.docs.map( async doc=>{
                     let user = await doc.data().user_id.get()
-                    setIsPostLoading(false)
+                    
                     return {
                         id : doc.id,
                         post : doc.data(),
@@ -47,13 +47,13 @@ const Profile = (props) => {
                         photoUrl : user.data().photoUrl
                     }
                 })))
+                setIsPostLoading(false)
             } catch (err){
                 console.log(err)
+                setIsPostLoading(false)
             }
         })
-        return ()=>{
-            unsubscribePosts()
-        }
+        
     },[])
 
     const changeSection = (e)=>{

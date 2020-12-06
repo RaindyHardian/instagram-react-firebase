@@ -2,17 +2,16 @@ import React, { useState, useEffect } from "react";
 import { Avatar } from "@material-ui/core";
 import { db } from "../../firebase";
 
-const Activity = props => {
+const Activity = (props) => {
   const [acts, setActs] = useState([]);
   useEffect(() => {
-    var unsubscribePosts = db
-      .collection(`users/${props.user_id}/activity`)
-      .orderBy('timestamp','desc')
-      .onSnapshot(async snapshot => {
+    db.collection(`users/${props.user_id}/activity`)
+      .orderBy("timestamp", "desc")
+      .onSnapshot(async (snapshot) => {
         try {
           setActs(
             await Promise.all(
-              snapshot.docs.map(async doc => {
+              snapshot.docs.map(async (doc) => {
                 let user = await doc.data().user_id.get();
                 let post = await db
                   .collection("posts")
@@ -24,7 +23,7 @@ const Activity = props => {
                   username: user.data().displayName,
                   user_id: user.id,
                   photoUrl: user.data().photoUrl,
-                  imageUrl: post.data().imageUrl
+                  imageUrl: post.data().imageUrl,
                 };
               })
             )
@@ -33,9 +32,9 @@ const Activity = props => {
           console.log(err);
         }
       });
-    return () => {
-      unsubscribePosts();
-    };
+    // return () => {
+    //   unsubscribePosts();
+    // };
   }, [props.user_id, props.isLoggedIn]);
   return (
     <div className="activity">

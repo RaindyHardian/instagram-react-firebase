@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import {
   Avatar,
   Button,
@@ -28,6 +28,7 @@ const Post = ({
   isLoggedIn,
   loggedInUser_id
 }) => {
+  const history = useHistory();
   const [comments, setComments] = useState([]);
   const [inputComment, setInputComment] = useState("");
   const [postLoading, setPostLoading] = useState(false);
@@ -118,8 +119,8 @@ const Post = ({
   }, []);
 
   useEffect(() => {
-    likes.map(like => {
-      if (like.id === loggedInUser_id) {
+    for(let i =0 ; i<likes.length;i++){
+      if(likes[i].id === loggedInUser_id){
         return setLikeSVG(
           <svg
             style={{ color: "#ed4956" }}
@@ -151,7 +152,7 @@ const Post = ({
           </svg>
         );
       }
-    });
+    }
   }, [likes, isLoggedIn]);
 
   const imageLoaded = () => {
@@ -266,10 +267,24 @@ const Post = ({
 
   const deletePost = () => {
     if (postUser_id === loggedInUser_id) {
-      // alert("SAMA post user_id "+ postUser_id + " || "+loggedInUser_id)
       db.collection("posts")
         .doc(postId)
         .delete();
+      let temp = []
+      db.collection(`users/${postUser_id}/activity`).get().then(function(querySnapshot) {
+        querySnapshot.forEach(function(doc) {
+            console.log(doc.id, " => ", doc.data());
+            if(doc.data().postId === postId){
+              temp.push(doc.id)
+            }
+        });
+      temp.map(item=>{
+        db.collection(`users/${postUser_id}/activity`)
+        .doc(item)
+        .delete();
+      })
+    })
+
     } else {
       alert("Can't perform deleting post");
     }
@@ -279,8 +294,9 @@ const Post = ({
     setAnchorEl(event.currentTarget);
   };
 
-  const dotClose = () => {
-    setAnchorEl(null);
+  const dotClose = (id) => {
+    history.push('/profile/'+id)
+    // setAnchorEl(null);
   };
 
   return (
@@ -325,7 +341,7 @@ const Post = ({
           open={Boolean(anchorEl)}
           onClose={dotClose}
         >
-          <MenuItem onClick={dotClose}>Visit Profile</MenuItem>
+          <MenuItem onClick={()=>dotClose(postUser_id)}>Visit Profile</MenuItem>
           {deletePostButton()}
         </Menu>
       </div>

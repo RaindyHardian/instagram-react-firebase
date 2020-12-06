@@ -550,7 +550,7 @@ body{
 
   .profile{
     background-color: unset;  
-    max-width: 700px;
+    width:700px;
   }
   .profile__displayName{
     font-size: 18px;

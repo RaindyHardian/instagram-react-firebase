@@ -114,6 +114,7 @@ const BottomNav = props => {
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
+              onClick={notLoggedIn}
             >
               <path
                 strokeLinecap="round"
